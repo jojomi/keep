@@ -1,4 +1,5 @@
 # keep
+![Coverage](https://img.shields.io/badge/Coverage-91.8%25-brightgreen)
 
 [![Godoc Reference](https://godoc.org/github.com/jojomi/keep?status.svg)](http://godoc.org/github.com/jojomi/keep)
 ![Go Version](https://img.shields.io/github/go-mod/go-version/jojomi/keep)
