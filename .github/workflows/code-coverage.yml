@@ -1,3 +1,5 @@
+name: "Code Coverage Badge (Readme)"
+
 on:
   push:
     branches: [ main ]
