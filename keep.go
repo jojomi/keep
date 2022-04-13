@@ -6,10 +6,12 @@ import (
 	"time"
 )
 
+// TimeResource is an element with an associated time
 type TimeResource interface {
 	GetTime() time.Time
 }
 
+// Requirements define which elements in an input slice should be kept
 type Requirements struct {
 	Hours  int
 	Days   int
@@ -18,18 +20,22 @@ type Requirements struct {
 	Years  int
 }
 
+// Empty is true iff no files should be kept
 func (x Requirements) Empty() bool {
 	return x.Hours == 0 && x.Days == 0 && x.Weeks == 0 && x.Months == 0 && x.Years == 0
 }
 
+// String prints a Requirement configuration
 func (x Requirements) String() string {
 	return fmt.Sprintf("%d hours, %d days, %d weeks, %d months, %d years", x.Hours, x.Days, x.Weeks, x.Months, x.Years)
 }
 
+// List returns the elements from the input slice that should be kept according to the Requirements given
 func List(input []TimeResource, reqs Requirements) ([]TimeResource, error) {
 	return ListForDate(time.Now(), input, reqs)
 }
 
+// ListForDate returns the elements from the input slice that should be kept according to the Requirements given using a reference date
 func ListForDate(referenceDate time.Time, input []TimeResource, reqs Requirements) ([]TimeResource, error) {
 	result := make([]TimeResource, 0)
 
@@ -64,12 +70,12 @@ func ListForDate(referenceDate time.Time, input []TimeResource, reqs Requirement
 	return result, nil
 }
 
-func sortResources(input []TimeResource) {
-	slices.SortFunc(input, func(a, b TimeResource) bool {
-		return a.GetTime().After(b.GetTime())
-	})
+// ListRemovable returns the elements from the input slice that should *NOT* be kept according to the Requirements given
+func ListRemovable(input []TimeResource, reqs Requirements) ([]TimeResource, error) {
+	return ListRemovableForDate(time.Now(), input, reqs)
 }
 
+// ListRemovableForDate returns the elements from the input slice that should *NOT* be kept according to the Requirements given using a reference date
 func ListRemovableForDate(referenceDate time.Time, input []TimeResource, reqs Requirements) ([]TimeResource, error) {
 	keep, err := ListForDate(referenceDate, input, reqs)
 	result := make([]TimeResource, 0, len(input)-len(keep))
@@ -93,8 +99,10 @@ out:
 	return result, nil
 }
 
-func ListRemovable(input []TimeResource, reqs Requirements) ([]TimeResource, error) {
-	return ListRemovableForDate(time.Now(), input, reqs)
+func sortResources(input []TimeResource) {
+	slices.SortFunc(input, func(a, b TimeResource) bool {
+		return a.GetTime().After(b.GetTime())
+	})
 }
 
 func nextTick(current time.Time, requirements Requirements) (time.Time, Requirements) {
