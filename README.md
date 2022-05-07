@@ -18,12 +18,11 @@ go get github.com/jojomi/keep
 
 ## Algorithm
 
-Given the configuration below (12 hours, 7 days, 12 weeks, 12 months, and 4 years) this library will operate on the list of elements sorted by date, youngest first.
+Given the configuration below (3 last, 12 hours, 7 days, 12 weeks, 12 months, and 4 years) this library will operate on the list of elements sorted by date, youngest first.
+* It will select the first 3 elements from the list (last)
 * It then will select 12 elements that are not less than an hour apart, the first of them being the youngest file there is in the set.
-* If there is still older elements, it will continue to select 7 items that are not less than a day apart. None of them has been selected before and none is younger than any of the hourly elements.
-* This continues as long as there is more elements to be considered.
+* It will then reset the time and select 7 elements that are not less than a day apart, the first of them being the youngest file there is in the set.
 * It is allowed to skip definitions, so you don't have to select daily elements even if you specify hourly and weekly selections.
-* If there is enough input elements in the right timeslots, then this algorithm will pick 12+7+12+12+4 = 47 of them.
 
 ## Usage
 
@@ -31,19 +30,27 @@ Given the configuration below (12 hours, 7 days, 12 weeks, 12 months, and 4 year
 import "github.com/jojomi/keep"
 
 func main() {
-    reqs := Requirements{
-        Hours:  12,
-        Days:   7,
-        Weeks:  12,
-        Months: 12,
-        Years:  4,
-    },
-    k, err := keep.List(input, reqs)
-    if err != nil {
-        panic(err)
+    j := NewDefaultJailhouse()
+    j.AddElements(...)
+
+    reqs := NewRequirementsFromMap(map[TimeRange]uint16{
+        LAST: 3,
+        DAY:  2,
+        MONTH: 4,
+    })
+
+    j.ApplyRequirements(*reqs)
+    kept := j.KeptElements()
+    deletable := j.FreeElements()
+
+    // print kept elements
+    for _, k := range kept {
+        // handle here, use .
     }
-    for _, kk := range k {
-        fmt.Println(k.GetTime())
+	
+    // delete now
+    for _, k := range kept {
+        // handle deletion here
     }
 }
 ```
