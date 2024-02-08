@@ -3,7 +3,7 @@
 [![Godoc Reference](https://godoc.org/github.com/jojomi/keep?status.svg)](http://godoc.org/github.com/jojomi/keep)
 ![Go Version](https://img.shields.io/github/go-mod/go-version/jojomi/keep)
 ![Last Commit](https://img.shields.io/github/last-commit/jojomi/keep)
-![Coverage](https://img.shields.io/badge/Coverage-44.0%25-yellow)
+![Coverage](https://img.shields.io/badge/Coverage-42.6%25-yellow)
 [![Go Report Card](https://goreportcard.com/badge/jojomi/keep)](https://goreportcard.com/report/jojomi/keep)
 [![License](https://img.shields.io/badge/License-MIT-orange.svg)](https://github.com/jojomi/keep/blob/master/LICENSE)
 
