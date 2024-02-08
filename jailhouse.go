@@ -1,9 +1,10 @@
 package keep
 
 import (
+	"time"
+
 	"github.com/juju/errors"
 	"golang.org/x/exp/slices"
-	"time"
 )
 
 type Jailhouse struct {
@@ -168,7 +169,13 @@ func (x Jailhouse) nextTickForLevel(current time.Time, requirements Requirements
 }
 
 func (x Jailhouse) sortResources(input []*JailhouseTimeResource) {
-	slices.SortFunc(input, func(a, b *JailhouseTimeResource) bool {
-		return a.GetTime().After(b.GetTime())
+	slices.SortFunc(input, func(a, b *JailhouseTimeResource) int {
+		if a.GetTime().Equal(b.GetTime()) {
+			return 0
+		}
+		if a.GetTime().After(b.GetTime()) {
+			return 1
+		}
+		return -1
 	})
 }
