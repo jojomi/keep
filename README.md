@@ -20,8 +20,9 @@ go get github.com/jojomi/keep
 
 Given the configuration below (3 last, 12 hours, 7 days, 12 weeks, 12 months, and 4 years) this library will operate on the list of elements sorted by date, youngest first.
 * It will select the first 3 elements from the list (last)
-* It then will select 12 elements that are not less than an hour apart, the first of them being the youngest file there is in the set.
-* It will then reset the time and select 7 elements that are not less than a day apart, the first of them being the youngest file there is in the set.
+* It then will select 12 elements that are not more than an hour apart (plus one minute extended range), the first of them being the youngest file not yet processed in the set.
+* It will then select 7 elements that are not less than a day (plus one hour) apart, the first of them being the youngest file not yet processed in the set.
+* and so on as far as levels are defined.
 * It is allowed to skip definitions, so you don't have to select daily elements even if you specify hourly and weekly selections.
 
 ## Usage
@@ -45,12 +46,12 @@ func main() {
 
     // print kept elements
     for _, k := range kept {
-        // handle here, use .
+        // handle here
     }
 	
     // delete now
-    for _, k := range kept {
-        // handle deletion here
+    for _, k := range deletable {
+        // handle here
     }
 }
 ```
@@ -62,10 +63,6 @@ type TimeResource interface {
 	GetTime() time.Time
 }
 ```
-
-If you are interested in the elements that can be _removed_ under the rules of your, swap [`List`](https://pkg.go.dev/github.com/jojomi/keep#List) for [`ListRemovable`](https://pkg.go.dev/github.com/jojomi/keep#ListRemovable).
-
-For tests or special needs, there are also functions named [`ListForDate`](https://pkg.go.dev/github.com/jojomi/keep#ListForDate) and [`ListRemovableForDate`](https://pkg.go.dev/github.com/jojomi/keep#ListRemovableForDate).
 
 ## Development
 

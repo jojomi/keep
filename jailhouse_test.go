@@ -10,6 +10,7 @@ func TestJailhouse_KeptElements(t *testing.T) {
 	testDate := time.Date(2024, time.January, 20, 0, 0, 0, 0, time.UTC)
 
 	type fields struct {
+		testDate     time.Time
 		elements     []TimeResource
 		requirements *Requirements
 	}
@@ -21,6 +22,7 @@ func TestJailhouse_KeptElements(t *testing.T) {
 		{
 			name: "last 1 (unordered)", // requires sorting of elements by time and older ones
 			fields: fields{
+				testDate: testDate,
 				elements: []TimeResource{
 					date("2023-03-09"),
 					date("2023-01-01"),
@@ -35,6 +37,7 @@ func TestJailhouse_KeptElements(t *testing.T) {
 		{
 			name: "last n", // selects more than one
 			fields: fields{
+				testDate: testDate,
 				elements: []TimeResource{
 					date("2023-01-01"),
 					date("2023-02-22"),
@@ -48,8 +51,27 @@ func TestJailhouse_KeptElements(t *testing.T) {
 			},
 		},
 		{
+			name: "year 2", // skips in-between elements
+			fields: fields{
+				testDate: testDate,
+				elements: []TimeResource{
+					date("2023-05-09"), // YEAR-1
+					date("2023-02-22"),
+					date("2022-05-11"),
+					date("2022-05-08"), // YEAR-2
+					date("2022-02-08"), // slightly too old for year 2 (1 year since last + 1 quarter)
+				},
+				requirements: NewRequirements().Add(YEAR, 2),
+			},
+			want: []*JailhouseTimeResource{
+				NewJailhouseTimeResource(date("2023-05-09")).AddTag(TimeRangeTagFrom(YEAR, 1)),
+				NewJailhouseTimeResource(date("2022-05-08")).AddTag(TimeRangeTagFrom(YEAR, 2)),
+			},
+		},
+		{
 			name: "last 1 and day 1", // combines two levels
 			fields: fields{
+				testDate: testDate,
 				elements: []TimeResource{
 					date("2023-01-01"),
 					date("2023-02-22"),
@@ -63,19 +85,47 @@ func TestJailhouse_KeptElements(t *testing.T) {
 			},
 		},
 		{
-			name: "year 2", // skips in-between elements
+			name: "ignore future",
 			fields: fields{
+				testDate: testDate,
 				elements: []TimeResource{
-					date("2022-05-10"), // slightly too old for year 1
-					date("2022-05-01"),
+					date("2025-01-01"),
 					date("2023-02-22"),
-					date("2023-05-09"),
 				},
-				requirements: NewRequirements().Add(YEAR, 2),
+				requirements: NewRequirements().Add(LAST, 1),
 			},
 			want: []*JailhouseTimeResource{
-				NewJailhouseTimeResource(date("2023-05-09")).AddTag(TimeRangeTagFrom(YEAR, 1)),
-				NewJailhouseTimeResource(date("2022-05-01")).AddTag(TimeRangeTagFrom(YEAR, 2)),
+				NewJailhouseTimeResource(date("2023-02-22")).AddTag(TimeRangeTagFrom(LAST, 1)),
+			},
+		},
+		{
+			name: "multi-level",
+			fields: fields{
+				testDate: testDate,
+				elements: []TimeResource{
+					date("2023-02-22"), // LAST-1
+					date("2023-02-17"), // LAST-2
+					date("2023-02-10"), // DAY-1
+					date("2023-02-02"), // DAY-2
+					date("2023-01-14"), // WEEK-1
+					date("2023-01-11"),
+					date("2023-01-07"), // WEEK-2
+					date("2023-01-01"), // MONTH-1
+					date("2022-12-22"),
+					date("2022-11-30"), // MONTH-2
+					date("2022-11-25"),
+				},
+				requirements: NewRequirements().Add(LAST, 2).Add(DAY, 2).Add(WEEK, 2).Add(MONTH, 2),
+			},
+			want: []*JailhouseTimeResource{
+				NewJailhouseTimeResource(date("2023-02-22")).AddTag(TimeRangeTagFrom(LAST, 1)),
+				NewJailhouseTimeResource(date("2023-02-17")).AddTag(TimeRangeTagFrom(LAST, 2)),
+				NewJailhouseTimeResource(date("2023-02-10")).AddTag(TimeRangeTagFrom(DAY, 1)),
+				NewJailhouseTimeResource(date("2023-02-02")).AddTag(TimeRangeTagFrom(DAY, 2)),
+				NewJailhouseTimeResource(date("2023-01-14")).AddTag(TimeRangeTagFrom(WEEK, 1)),
+				NewJailhouseTimeResource(date("2023-01-07")).AddTag(TimeRangeTagFrom(WEEK, 2)),
+				NewJailhouseTimeResource(date("2023-01-01")).AddTag(TimeRangeTagFrom(MONTH, 1)),
+				NewJailhouseTimeResource(date("2022-11-30")).AddTag(TimeRangeTagFrom(MONTH, 2)),
 			},
 		},
 	}
