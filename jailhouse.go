@@ -99,7 +99,6 @@ func (x Jailhouse) FilteredElements(filter func(*JailhouseTimeResource) bool) []
 		result = append(result, element)
 	}
 	return result
-
 }
 
 func (x Jailhouse) KeptElements() []*JailhouseTimeResource {
