@@ -173,8 +173,8 @@ func (x Jailhouse) sortResources(input []*JailhouseTimeResource) {
 			return 0
 		}
 		if a.GetTime().After(b.GetTime()) {
-			return 1
+			return -1
 		}
-		return -1
+		return 1
 	})
 }
