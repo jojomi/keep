@@ -66,3 +66,11 @@ type TimeResource interface {
 If you are interested in the elements that can be _removed_ under the rules of your, swap [`List`](https://pkg.go.dev/github.com/jojomi/keep#List) for [`ListRemovable`](https://pkg.go.dev/github.com/jojomi/keep#ListRemovable).
 
 For tests or special needs, there are also functions named [`ListForDate`](https://pkg.go.dev/github.com/jojomi/keep#ListForDate) and [`ListRemovableForDate`](https://pkg.go.dev/github.com/jojomi/keep#ListRemovableForDate).
+
+## Development
+
+Add git hooks:
+
+``` shell
+git config --local core.hooksPath .githooks/
+```
