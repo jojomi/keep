@@ -8,14 +8,14 @@ import (
 	"golang.org/x/exp/slices"
 )
 
-type Jailhouse struct {
-	elements []*JailhouseTimeResource
+type Jailhouse[T TimeResource] struct {
+	elements []*JailhouseTimeResource[T]
 	levels   []TimeRange
 }
 
-func NewDefaultJailhouse() *Jailhouse {
-	jailhouse := &Jailhouse{
-		elements: make([]*JailhouseTimeResource, 0),
+func NewDefaultJailhouse[T TimeResource]() *Jailhouse[T] {
+	jailhouse := &Jailhouse[T]{
+		elements: make([]*JailhouseTimeResource[T], 0),
 		levels: []TimeRange{
 			LAST, SECOND, MINUTE, HOUR, DAY, WEEK, MONTH, QUARTER, YEAR, DECADE, CENTURY, MILLENIUM,
 		},
@@ -23,14 +23,14 @@ func NewDefaultJailhouse() *Jailhouse {
 	return jailhouse
 }
 
-func (x *Jailhouse) GetLevels() []TimeRange {
+func (x *Jailhouse[T]) GetLevels() []TimeRange {
 	return x.levels
 }
 
-func (x *Jailhouse) AddElements(elems ...TimeResource) *Jailhouse {
+func (x *Jailhouse[T]) AddElements(elems ...T) *Jailhouse[T] {
 	// add
 	for _, e := range elems {
-		x.elements = append(x.elements, NewJailhouseTimeResource(e))
+		x.elements = append(x.elements, NewJailhouseTimeResource[T](e))
 	}
 
 	// sort
@@ -39,11 +39,11 @@ func (x *Jailhouse) AddElements(elems ...TimeResource) *Jailhouse {
 	return x
 }
 
-func (x *Jailhouse) ApplyRequirements(reqs Requirements) *Jailhouse {
+func (x *Jailhouse[T]) ApplyRequirements(reqs Requirements) *Jailhouse[T] {
 	return x.ApplyRequirementsForDate(reqs, time.Now())
 }
 
-func (x *Jailhouse) ApplyRequirementsForDate(reqs Requirements, referenceDate time.Time) *Jailhouse {
+func (x *Jailhouse[T]) ApplyRequirementsForDate(reqs Requirements, referenceDate time.Time) *Jailhouse[T] {
 	// clear previous results
 	for _, item := range x.elements {
 		item.ClearTags()
@@ -57,8 +57,8 @@ func (x *Jailhouse) ApplyRequirementsForDate(reqs Requirements, referenceDate ti
 		extendedTime      time.Time
 		levelElementIndex int
 		startElementIndex = 0
-		item              *JailhouseTimeResource
-		nextItem          *JailhouseTimeResource
+		item              *JailhouseTimeResource[T]
+		nextItem          *JailhouseTimeResource[T]
 		elementCount      = len(x.elements)
 		levelStart        int
 	)
@@ -117,8 +117,8 @@ func (x *Jailhouse) ApplyRequirementsForDate(reqs Requirements, referenceDate ti
 	return x
 }
 
-func (x Jailhouse) FilteredElements(filter func(*JailhouseTimeResource) bool) []*JailhouseTimeResource {
-	result := make([]*JailhouseTimeResource, 0)
+func (x *Jailhouse[T]) FilteredElements(filter func(*JailhouseTimeResource[T]) bool) []*JailhouseTimeResource[T] {
+	result := make([]*JailhouseTimeResource[T], 0)
 	for _, element := range x.elements {
 		if !filter(element) {
 			continue
@@ -128,29 +128,29 @@ func (x Jailhouse) FilteredElements(filter func(*JailhouseTimeResource) bool) []
 	return result
 }
 
-func (x Jailhouse) KeptElements() []*JailhouseTimeResource {
-	return x.FilteredElements(func(element *JailhouseTimeResource) bool {
+func (x *Jailhouse[T]) KeptElements() []*JailhouseTimeResource[T] {
+	return x.FilteredElements(func(element *JailhouseTimeResource[T]) bool {
 		return !element.IsFree()
 	})
 }
 
-func (x Jailhouse) KeptElementsByLevel(level TimeRange) []*JailhouseTimeResource {
-	return x.FilteredElements(func(element *JailhouseTimeResource) bool {
+func (x *Jailhouse[T]) KeptElementsByLevel(level TimeRange) []*JailhouseTimeResource[T] {
+	return x.FilteredElements(func(element *JailhouseTimeResource[T]) bool {
 		return element.HasLevel(level)
 	})
 }
 
-func (x Jailhouse) FreeElements() []*JailhouseTimeResource {
-	return x.FilteredElements(func(element *JailhouseTimeResource) bool {
+func (x *Jailhouse[T]) FreeElements() []*JailhouseTimeResource[T] {
+	return x.FilteredElements(func(element *JailhouseTimeResource[T]) bool {
 		return element.IsFree()
 	})
 }
 
-func (x Jailhouse) Elements() []*JailhouseTimeResource {
+func (x *Jailhouse[T]) Elements() []*JailhouseTimeResource[T] {
 	return x.elements
 }
 
-func (x Jailhouse) nextTickForLevel(current time.Time, requirements Requirements, level TimeRange) (newTime, extendedTime time.Time, lastOfType bool, newRequirements Requirements) {
+func (x *Jailhouse[T]) nextTickForLevel(current time.Time, requirements Requirements, level TimeRange) (newTime, extendedTime time.Time, lastOfType bool, newRequirements Requirements) {
 	if requirements.Get(level) == 0 {
 		return
 	}
@@ -167,7 +167,7 @@ func (x Jailhouse) nextTickForLevel(current time.Time, requirements Requirements
 	return
 }
 
-func (x Jailhouse) addLevelStep(level TimeRange, current time.Time) time.Time {
+func (x *Jailhouse[T]) addLevelStep(level TimeRange, current time.Time) time.Time {
 	switch level {
 	case LAST:
 		return current
@@ -202,8 +202,8 @@ func (x Jailhouse) addLevelStep(level TimeRange, current time.Time) time.Time {
 	}
 }
 
-func (x Jailhouse) sortResources(input []*JailhouseTimeResource) {
-	slices.SortFunc(input, func(a, b *JailhouseTimeResource) int {
+func (x *Jailhouse[T]) sortResources(input []*JailhouseTimeResource[T]) {
+	slices.SortFunc(input, func(a, b *JailhouseTimeResource[T]) int {
 		if a.GetTime().Equal(b.GetTime()) {
 			return 0
 		}

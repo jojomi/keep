@@ -10,7 +10,7 @@ import (
 func TestJailhouseTimeResource_AddLevel(t *testing.T) {
 	type fields struct {
 		Levels       []TimeRangeTag
-		TimeResource TimeResource
+		TimeResource *TestTimeResource
 	}
 	type args struct {
 		level TimeRangeTag
@@ -46,7 +46,7 @@ func TestJailhouseTimeResource_AddLevel(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			x := &JailhouseTimeResource{
+			x := &JailhouseTimeResource[*TestTimeResource]{
 				Tags:         tt.fields.Levels,
 				TimeResource: tt.fields.TimeResource,
 			}
@@ -62,7 +62,7 @@ func TestJailhouseTimeResource_GetTime(t *testing.T) {
 
 	type fields struct {
 		Levels       []TimeRangeTag
-		TimeResource TimeResource
+		TimeResource TestTimeResource
 	}
 	tests := []struct {
 		name   string
@@ -82,7 +82,7 @@ func TestJailhouseTimeResource_GetTime(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			x := JailhouseTimeResource{
+			x := JailhouseTimeResource[TestTimeResource]{
 				Tags:         tt.fields.Levels,
 				TimeResource: tt.fields.TimeResource,
 			}
@@ -94,7 +94,7 @@ func TestJailhouseTimeResource_GetTime(t *testing.T) {
 func TestJailhouseTimeResource_HasLevel(t *testing.T) {
 	type fields struct {
 		Levels       []TimeRangeTag
-		TimeResource TimeResource
+		TimeResource TestTimeResource
 	}
 	type args struct {
 		level TimeRange
@@ -111,7 +111,7 @@ func TestJailhouseTimeResource_HasLevel(t *testing.T) {
 				Levels: []TimeRangeTag{
 					TimeRangeTagFrom(DAY, 1),
 				},
-				TimeResource: nil,
+				TimeResource: date("2024-04-04"),
 			},
 			args: args{
 				DAY,
@@ -124,7 +124,7 @@ func TestJailhouseTimeResource_HasLevel(t *testing.T) {
 				Levels: []TimeRangeTag{
 					TimeRangeTagFrom(WEEK, 1),
 				},
-				TimeResource: nil,
+				TimeResource: date("2024-04-04"),
 			},
 			args: args{
 				DAY,
@@ -134,7 +134,7 @@ func TestJailhouseTimeResource_HasLevel(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			x := &JailhouseTimeResource{
+			x := &JailhouseTimeResource[TestTimeResource]{
 				Tags:         tt.fields.Levels,
 				TimeResource: tt.fields.TimeResource,
 			}
@@ -146,7 +146,7 @@ func TestJailhouseTimeResource_HasLevel(t *testing.T) {
 func TestJailhouseTimeResource_IsFree(t *testing.T) {
 	type fields struct {
 		Levels       []TimeRangeTag
-		TimeResource TimeResource
+		TimeResource TestTimeResource
 	}
 	tests := []struct {
 		name   string
@@ -157,7 +157,7 @@ func TestJailhouseTimeResource_IsFree(t *testing.T) {
 			name: "free",
 			fields: fields{
 				Levels:       []TimeRangeTag{},
-				TimeResource: nil,
+				TimeResource: date("2024-04-04"),
 			},
 			want: true,
 		},
@@ -165,7 +165,7 @@ func TestJailhouseTimeResource_IsFree(t *testing.T) {
 			name: "free (nil)",
 			fields: fields{
 				Levels:       nil,
-				TimeResource: nil,
+				TimeResource: date("2024-04-04"),
 			},
 			want: true,
 		},
@@ -173,14 +173,14 @@ func TestJailhouseTimeResource_IsFree(t *testing.T) {
 			name: "not free",
 			fields: fields{
 				Levels:       []TimeRangeTag{TimeRangeTagFrom(DAY, 1)},
-				TimeResource: nil,
+				TimeResource: date("2024-04-04"),
 			},
 			want: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			x := JailhouseTimeResource{
+			x := JailhouseTimeResource[TestTimeResource]{
 				Tags:         tt.fields.Levels,
 				TimeResource: tt.fields.TimeResource,
 			}
@@ -195,7 +195,7 @@ func TestJailhouseTimeResource_String(t *testing.T) {
 
 	type fields struct {
 		Levels       []TimeRangeTag
-		TimeResource TimeResource
+		TimeResource TestTimeResource
 	}
 	tests := []struct {
 		name   string
@@ -215,7 +215,7 @@ func TestJailhouseTimeResource_String(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			x := JailhouseTimeResource{
+			x := JailhouseTimeResource[TestTimeResource]{
 				Tags:         tt.fields.Levels,
 				TimeResource: tt.fields.TimeResource,
 			}
@@ -255,7 +255,7 @@ func TestJailhouseTimeResource_GetLevels(t *testing.T) {
 
 	type fields struct {
 		Levels       []TimeRangeTag
-		TimeResource TimeResource
+		TimeResource TestTimeResource
 	}
 	tests := []struct {
 		name   string
@@ -266,14 +266,14 @@ func TestJailhouseTimeResource_GetLevels(t *testing.T) {
 			name: "",
 			fields: fields{
 				Levels:       levels,
-				TimeResource: nil,
+				TimeResource: date("2024-04-04"),
 			},
 			want: levels,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			x := JailhouseTimeResource{
+			x := JailhouseTimeResource[TestTimeResource]{
 				Tags:         tt.fields.Levels,
 				TimeResource: tt.fields.TimeResource,
 			}

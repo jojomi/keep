@@ -7,38 +7,38 @@ import (
 )
 
 // JailhouseTimeResource is an TimeResource with annotated Jailhouse data
-type JailhouseTimeResource struct {
+type JailhouseTimeResource[T TimeResource] struct {
 	Tags         []TimeRangeTag
-	TimeResource TimeResource
+	TimeResource T
 }
 
-func NewJailhouseTimeResource(resource TimeResource) *JailhouseTimeResource {
-	x := JailhouseTimeResource{
+func NewJailhouseTimeResource[T TimeResource](resource T) *JailhouseTimeResource[T] {
+	x := JailhouseTimeResource[T]{
 		TimeResource: resource,
 	}
 	x.ClearTags()
 	return &x
 }
 
-func (x JailhouseTimeResource) GetTime() time.Time {
+func (x JailhouseTimeResource[T]) GetTime() time.Time {
 	return x.TimeResource.GetTime()
 }
 
-func (x JailhouseTimeResource) GetTags() []TimeRangeTag {
+func (x JailhouseTimeResource[T]) GetTags() []TimeRangeTag {
 	return x.Tags
 }
 
-func (x *JailhouseTimeResource) ClearTags() *JailhouseTimeResource {
+func (x *JailhouseTimeResource[T]) ClearTags() *JailhouseTimeResource[T] {
 	x.Tags = []TimeRangeTag{}
 	return x
 }
 
-func (x *JailhouseTimeResource) AddTag(tag TimeRangeTag) *JailhouseTimeResource {
+func (x *JailhouseTimeResource[T]) AddTag(tag TimeRangeTag) *JailhouseTimeResource[T] {
 	x.Tags = append(x.Tags, tag)
 	return x
 }
 
-func (x *JailhouseTimeResource) HasLevel(level TimeRange) bool {
+func (x *JailhouseTimeResource[T]) HasLevel(level TimeRange) bool {
 	for _, l := range x.Tags {
 		if l.TimeRange == level {
 			return true
@@ -47,11 +47,11 @@ func (x *JailhouseTimeResource) HasLevel(level TimeRange) bool {
 	return false
 }
 
-func (x JailhouseTimeResource) IsFree() bool {
+func (x JailhouseTimeResource[T]) IsFree() bool {
 	return x.Tags == nil || len(x.Tags) <= 0
 }
 
-func (x JailhouseTimeResource) String() string {
+func (x JailhouseTimeResource[T]) String() string {
 	elems := make([]string, len(x.Tags))
 	for i, v := range x.Tags {
 		elems[i] = v.String()

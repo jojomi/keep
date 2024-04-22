@@ -11,41 +11,41 @@ func TestJailhouse_KeptElements(t *testing.T) {
 
 	type fields struct {
 		testDate     time.Time
-		elements     []TimeResource
+		elements     []TestTimeResource
 		requirements *Requirements
 	}
 	tests := []struct {
 		name   string
 		fields fields
-		want   []*JailhouseTimeResource
+		want   []*JailhouseTimeResource[TestTimeResource]
 	}{
 		{
 			name: "last 1 (unordered)", // requires sorting of elements by time and older ones
 			fields: fields{
 				testDate: testDate,
-				elements: []TimeResource{
+				elements: []TestTimeResource{
 					date("2023-03-09"),
 					date("2023-01-01"),
 					date("2023-02-22"),
 				},
 				requirements: NewRequirements().Add(LAST, 1),
 			},
-			want: []*JailhouseTimeResource{
-				NewJailhouseTimeResource(date("2023-03-09")).AddTag(TimeRangeTagFrom(LAST, 1)),
+			want: []*JailhouseTimeResource[TestTimeResource]{
+				NewJailhouseTimeResource[TestTimeResource](date("2023-03-09")).AddTag(TimeRangeTagFrom(LAST, 1)),
 			},
 		},
 		{
 			name: "last n", // selects more than one
 			fields: fields{
 				testDate: testDate,
-				elements: []TimeResource{
+				elements: []TestTimeResource{
 					date("2023-01-01"),
 					date("2023-02-22"),
 					date("2023-03-09"),
 				},
 				requirements: NewRequirements().Add(LAST, 2),
 			},
-			want: []*JailhouseTimeResource{
+			want: []*JailhouseTimeResource[TestTimeResource]{
 				NewJailhouseTimeResource(date("2023-02-22")).AddTag(TimeRangeTagFrom(LAST, 2)),
 				NewJailhouseTimeResource(date("2023-03-09")).AddTag(TimeRangeTagFrom(LAST, 1)),
 			},
@@ -54,7 +54,7 @@ func TestJailhouse_KeptElements(t *testing.T) {
 			name: "year 2", // skips in-between elements
 			fields: fields{
 				testDate: testDate,
-				elements: []TimeResource{
+				elements: []TestTimeResource{
 					date("2023-05-09"), // YEAR-1
 					date("2023-02-22"),
 					date("2022-05-11"),
@@ -63,7 +63,7 @@ func TestJailhouse_KeptElements(t *testing.T) {
 				},
 				requirements: NewRequirements().Add(YEAR, 2),
 			},
-			want: []*JailhouseTimeResource{
+			want: []*JailhouseTimeResource[TestTimeResource]{
 				NewJailhouseTimeResource(date("2023-05-09")).AddTag(TimeRangeTagFrom(YEAR, 1)),
 				NewJailhouseTimeResource(date("2022-05-08")).AddTag(TimeRangeTagFrom(YEAR, 2)),
 			},
@@ -72,14 +72,14 @@ func TestJailhouse_KeptElements(t *testing.T) {
 			name: "last 1 and day 1", // combines two levels
 			fields: fields{
 				testDate: testDate,
-				elements: []TimeResource{
+				elements: []TestTimeResource{
 					date("2023-01-01"),
 					date("2023-02-22"),
 					date("2023-03-09"),
 				},
 				requirements: NewRequirements().Add(LAST, 1).Add(DAY, 1),
 			},
-			want: []*JailhouseTimeResource{
+			want: []*JailhouseTimeResource[TestTimeResource]{
 				NewJailhouseTimeResource(date("2023-03-09")).AddTag(TimeRangeTagFrom(LAST, 1)),
 				NewJailhouseTimeResource(date("2023-02-22")).AddTag(TimeRangeTagFrom(DAY, 1)),
 			},
@@ -88,13 +88,13 @@ func TestJailhouse_KeptElements(t *testing.T) {
 			name: "ignore future",
 			fields: fields{
 				testDate: testDate,
-				elements: []TimeResource{
+				elements: []TestTimeResource{
 					date("2025-01-01"),
 					date("2023-02-22"),
 				},
 				requirements: NewRequirements().Add(LAST, 1),
 			},
-			want: []*JailhouseTimeResource{
+			want: []*JailhouseTimeResource[TestTimeResource]{
 				NewJailhouseTimeResource(date("2023-02-22")).AddTag(TimeRangeTagFrom(LAST, 1)),
 			},
 		},
@@ -102,7 +102,7 @@ func TestJailhouse_KeptElements(t *testing.T) {
 			name: "multi-level",
 			fields: fields{
 				testDate: testDate,
-				elements: []TimeResource{
+				elements: []TestTimeResource{
 					date("2023-02-22"), // LAST-1
 					date("2023-02-17"), // LAST-2
 					date("2023-02-10"), // DAY-1
@@ -117,7 +117,7 @@ func TestJailhouse_KeptElements(t *testing.T) {
 				},
 				requirements: NewRequirements().Add(LAST, 2).Add(DAY, 2).Add(WEEK, 2).Add(MONTH, 2),
 			},
-			want: []*JailhouseTimeResource{
+			want: []*JailhouseTimeResource[TestTimeResource]{
 				NewJailhouseTimeResource(date("2023-02-22")).AddTag(TimeRangeTagFrom(LAST, 1)),
 				NewJailhouseTimeResource(date("2023-02-17")).AddTag(TimeRangeTagFrom(LAST, 2)),
 				NewJailhouseTimeResource(date("2023-02-10")).AddTag(TimeRangeTagFrom(DAY, 1)),
@@ -131,7 +131,7 @@ func TestJailhouse_KeptElements(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			x := NewDefaultJailhouse()
+			x := NewDefaultJailhouse[TestTimeResource]()
 			x.AddElements(tt.fields.elements...)
 			x.ApplyRequirementsForDate(*tt.fields.requirements, testDate)
 			assertSameElements(t, tt.want, x.KeptElements())
@@ -139,7 +139,7 @@ func TestJailhouse_KeptElements(t *testing.T) {
 	}
 }
 
-func assertSameElements(t *testing.T, expected, seen []*JailhouseTimeResource) {
+func assertSameElements(t *testing.T, expected, seen []*JailhouseTimeResource[TestTimeResource]) {
 	// sort both lists
 	sort.SliceStable(expected, func(i, j int) bool {
 		return expected[i].TimeResource.GetTime().After(expected[j].TimeResource.GetTime())
@@ -155,7 +155,7 @@ func assertSameElements(t *testing.T, expected, seen []*JailhouseTimeResource) {
 
 	// now loop and compare
 	var (
-		s            *JailhouseTimeResource
+		s            *JailhouseTimeResource[TestTimeResource]
 		sTags, eTags []TimeRangeTag
 		sTag         TimeRangeTag
 	)
@@ -191,12 +191,12 @@ func assertSameElements(t *testing.T, expected, seen []*JailhouseTimeResource) {
 	}
 }
 
-func date(date string) *TestTimeResource {
+func date(date string) TestTimeResource {
 	t, err := time.Parse("2006-01-02", date)
 	if err != nil {
 		panic(err)
 	}
-	return &TestTimeResource{
+	return TestTimeResource{
 		t: t,
 	}
 }
