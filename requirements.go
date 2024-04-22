@@ -2,6 +2,8 @@ package keep
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -22,6 +24,39 @@ func NewRequirementsFromMap(data map[TimeRange]uint16) *Requirements {
 	r := NewRequirements()
 	for key, value := range data {
 		r.ranges[key] = value
+	}
+	return r
+}
+
+func NewRequirementsFromString(source string) *Requirements {
+	r := NewRequirements()
+	re := regexp.MustCompile(`(?i)(\d+)\s+(last|seconds?|minutes?|hours?|days?|weeks?|months?|quarters?|years?)`)
+	matches := re.FindAllStringSubmatch(source, -1)
+	for _, match := range matches {
+		num, err := strconv.Atoi(match[1])
+		if err != nil {
+			continue
+		}
+		switch strings.ToLower(match[2]) {
+		case "last":
+			r.ranges[LAST] += uint16(num)
+		case "second", "seconds":
+			r.ranges[SECOND] += uint16(num)
+		case "minute", "minutes":
+			r.ranges[MINUTE] += uint16(num)
+		case "hour", "hours":
+			r.ranges[HOUR] += uint16(num)
+		case "day", "days":
+			r.ranges[DAY] += uint16(num)
+		case "week", "weeks":
+			r.ranges[WEEK] += uint16(num)
+		case "month", "months":
+			r.ranges[MONTH] += uint16(num)
+		case "quarter", "quarters":
+			r.ranges[QUARTER] += uint16(num)
+		case "year", "years":
+			r.ranges[YEAR] += uint16(num)
+		}
 	}
 	return r
 }
