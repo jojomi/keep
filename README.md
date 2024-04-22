@@ -12,6 +12,14 @@ Most obvious use case are backup files.
 
 ## Installation
 
+### CLI tool `keep`
+
+``` go
+go install github.com/jojomi/keep/command/keep@latest
+```
+
+### Golang library `keep`
+
 ``` go
 go get github.com/jojomi/keep
 ```
