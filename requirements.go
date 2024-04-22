@@ -15,7 +15,7 @@ type Requirements struct {
 // NewRequirements creates a new empty Requirement definition.
 func NewRequirements() *Requirements {
 	return &Requirements{
-		ranges: make(map[TimeRange]uint16, 0),
+		ranges: make(map[TimeRange]uint16),
 	}
 }
 
